@@ -1,0 +1,12 @@
+---
+import Base from '../../layouts/Base.astro';
+import EntryList from '../../components/EntryList.astro';
+import { ofType } from '../../lib/content';
+const notes = await ofType('writing', 'reflection');
+---
+<Base title="Writing">
+  <main class="wrap">
+    <div class="page-head"><h1>Writing</h1><p class="lede">Essays, thoughts, and reflections.</p></div>
+    <EntryList notes={notes} />
+  </main>
+</Base>

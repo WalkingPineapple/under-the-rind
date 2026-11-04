@@ -1,0 +1,15 @@
+---
+import Base from '../layouts/Base.astro';
+import Spiral from '../components/Spiral.astro';
+import { publicNotes } from '../lib/content';
+const notes = await publicNotes();
+---
+<Base title="Graph">
+  <main class="wrap">
+    <div class="page-head"><h1>Every eye is a <em>note</em></h1></div>
+    <div class="spiral-section">
+      <div><p class="lede" style="margin:0">A pineapple's eyes grow in spirals. Here, my notes do too, newest at the center.</p><p id="spiral-read" class="mono spiral-read">Hover over an eye to look closer.</p></div>
+      <div><Spiral notes={notes} /></div>
+    </div>
+  </main>
+</Base>

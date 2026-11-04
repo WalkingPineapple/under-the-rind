@@ -1,0 +1,92 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import EntryList from '../components/EntryList.astro';
+import Spiral from '../components/Spiral.astro';
+import { noteUrl, ofType, publicNotes } from '../lib/content';
+const notes = await publicNotes();
+const books = (await ofType('reading')).slice(0, 7);
+const trip = (await ofType('travel'))[0];
+---
+<Base hideHeader={true}>
+  <div class="hero" id="hero">
+    <div class="wrap">
+      <Header dark={true} />
+      <section class="hero-copy">
+        <h1>Under<br />the <em>Rind</em></h1>
+        <p>Hi, I'm Pineapple. I work in computer science, but mostly I'm just curious about how things work. This is my corner of the internet for notes, books, travel stories, and whatever has caught my attention this week.</p>
+        <button type="button" class="peel-btn" id="peel">Peel it open</button>
+      </section>
+    </div>
+    <div class="flesh" id="flesh" aria-hidden="true">
+      <div class="wrap">
+        <div class="flesh-top"><span>what_is_actually_going_on.md</span><span>?!?!?!?</span></div>
+        <div class="flesh-big">Wait,<br />how does <em>that</em> work?</div>
+        <div class="flesh-tags"><span>large language models</span><span>agents</span><span>quant trading</span><span>coffee</span><span>books</span><span>pineapple</span><span>whatever's next</span></div>
+      </div>
+    </div>
+  </div>
+  <main class="wrap">
+    <section class="home-section" aria-labelledby="fresh">
+      <div class="home-head"><h2 id="fresh">Freshly cut</h2><a href="/writing/">ls -lt /everything</a></div>
+      <EntryList notes={notes.slice(0, 4)} />
+    </section>
+    <section class="home-section spiral-section" aria-labelledby="eyes">
+      <div>
+        <div class="home-head" style="margin-bottom:0"><h2 id="eyes">Every eye is a note</h2></div>
+        <p class="lede">A pineapple's eyes grow in spirals. Here, my notes do too.</p>
+        <p id="spiral-read" class="mono spiral-read">Hover over an eye to look closer.</p>
+        <div class="legend">
+          <a href="/writing/"><i style="background:var(--ink)"></i>Writing</a>
+          <a href="/reading/"><i style="background:var(--honey)"></i>Reading</a>
+          <a href="/travel/"><i style="background:#F3DFA2"></i>Travel</a>
+        </div>
+      </div>
+      <div><Spiral notes={notes} /></div>
+    </section>
+    {books.length > 0 && (
+      <section class="home-section" aria-labelledby="shelf">
+        <div class="home-head"><h2 id="shelf">The shelf</h2><a href="/reading/">all books</a></div>
+        <div class="shelf">{books.map((b) => <a class="spine" href={noteUrl(b)}>{b.data.title}</a>)}</div>
+      </section>
+    )}
+    <section class="home-section home-pair">
+      {trip && (
+        <a class="postcard" href={noteUrl(trip)}>
+          <span><span class="mono">Postcard from</span><strong>{trip.data.place ?? trip.data.title}</strong>{trip.data.summary && <p>{trip.data.summary}</p>}</span>
+          <span class="stamp" aria-hidden="true">stamp</span>
+        </a>
+      )}
+      <div class="gate">
+        <h2>Weekly <em>is still under the rind</em></h2>
+        <p style="margin:26px 0 18px;font-size:19px">My weekly notes are behind a password.</p>
+        <a class="peel-link" href="/weekly/">Go to Weekly</a>
+      </div>
+    </section>
+  </main>
+  <script>
+    const hero = document.getElementById('hero');
+    const flesh = document.getElementById('flesh');
+    const button = document.getElementById('peel');
+    let open = false;
+    const paint = (x = 72, y = 42) => {
+      flesh.style.clipPath = open ? 'circle(160% at 72% 42%)' : `circle(150px at ${x}% ${y}%)`;
+    };
+    const move = (point) => {
+      if (open) return;
+      const r = hero.getBoundingClientRect();
+      paint(((point.clientX - r.left) / r.width) * 100, ((point.clientY - r.top) / r.height) * 100);
+    };
+    paint();
+    hero.addEventListener('mousemove', move);
+    hero.addEventListener('touchmove', (e) => e.touches[0] && move(e.touches[0]), { passive: true });
+    button.addEventListener('click', () => {
+      open = !open;
+      button.textContent = open ? 'Put the rind back' : 'Peel it open';
+      // Keep the button reachable above the opened flesh.
+      button.style.position = 'relative';
+      button.style.zIndex = '5';
+      paint();
+    });
+  </script>
+</Base>

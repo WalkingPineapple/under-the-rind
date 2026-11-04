@@ -1,0 +1,26 @@
+---
+import Base from '../layouts/Base.astro';
+const work = [1, 2, 3, 4];
+---
+<Base title="About">
+  <main class="wrap">
+    <div class="page-head"><h1>Hi, I'm <em>Pineapple.</em></h1><p class="lede">[Write your intro here: who you are and what this site is for.]</p></div>
+    <section class="anatomy" aria-labelledby="anatomy">
+      <div class="anatomy-art" aria-hidden="true"><div><div></div></div></div>
+      <div class="anatomy-list">
+        <h2 id="anatomy" class="section-title">Anatomy of a pineapple</h2>
+        <div><h3>The rind</h3><p>[What people notice first about you.]</p></div>
+        <div><h3>The flesh</h3><p>[What you care about and spend your time on.]</p></div>
+        <div><h3>The core</h3><p>[What stays true about you no matter what.]</p></div>
+      </div>
+    </section>
+    <section class="home-section" aria-labelledby="past">
+      <h2 id="past" class="section-title">Things I've worked on</h2>
+      <div class="work-grid">{work.map(() => <article><p class="mono">[Year]</p><h3>[Project or role]</h3><p>[One-line summary.]</p></article>)}</div>
+    </section>
+    <section class="home-section" aria-labelledby="now">
+      <h2 id="now" class="section-title">Currently curious about</h2>
+      <div class="pills"><span>[Topic]</span><span>[Topic]</span><span>[Topic]</span><span>[Topic]</span></div>
+    </section>
+  </main>
+</Base>
