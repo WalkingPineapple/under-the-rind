@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import site from '../../site.config.mjs';
 const work = [1, 2, 3, 4];
 ---
 <Base title="About">
@@ -20,7 +21,7 @@ const work = [1, 2, 3, 4];
     </section>
     <section class="home-section" aria-labelledby="now">
       <h2 id="now" class="section-title">Currently curious about</h2>
-      <div class="pills"><span>[Topic]</span><span>[Topic]</span><span>[Topic]</span><span>[Topic]</span></div>
+      <div class="pills">{site.curious.map((topic) => <span>{topic}</span>)}</div>
     </section>
   </main>
 </Base>

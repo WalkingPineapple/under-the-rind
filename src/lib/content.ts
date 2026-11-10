@@ -25,6 +25,12 @@ export const formatDate = (d: Date) =>
 export const readingTime = (body = '') =>
   Math.max(1, Math.round(body.trim().split(/\s+/).length / 220));
 
+/** "Large Language Models" -> "large-language-models". Non-English letters are kept. */
+export const tagSlug = (tag: string) =>
+  String(tag).trim().toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, '');
+
+export const tagUrl = (tag: string) => `/tags/${tagSlug(tag)}/`;
+
 export async function backlinks(note: any) {
   const names = new Set(
     [note.id, note.data.title, note.data.source, ...note.data.aliases].filter(Boolean).map(norm),

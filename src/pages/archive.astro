@@ -1,0 +1,21 @@
+---
+import Base from '../layouts/Base.astro';
+import EntryList from '../components/EntryList.astro';
+import { publicNotes } from '../lib/content';
+// Everything public, newest first, grouped by year. Weekly never appears here.
+const notes = await publicNotes();
+const yearOf = (n) => n.data.date.getUTCFullYear();
+const years = [...new Set(notes.map(yearOf))];
+const total = `${notes.length} ${notes.length === 1 ? 'note' : 'notes'}`;
+---
+<Base title="Archive" description="Every note on the site, newest first.">
+  <main class="wrap">
+    <div class="page-head"><h1>Everything, <em>newest first</em></h1><p class="lede">{total} across writing, reading, and travel.</p></div>
+    {years.map((year) => (
+      <section class="year" aria-labelledby={`year-${year}`}>
+        <h2 id={`year-${year}`} class="section-title">{year}</h2>
+        <EntryList notes={notes.filter((n) => yearOf(n) === year)} />
+      </section>
+    ))}
+  </main>
+</Base>

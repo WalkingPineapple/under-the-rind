@@ -1,0 +1,26 @@
+---
+import Base from '../../layouts/Base.astro';
+import EntryList from '../../components/EntryList.astro';
+import { publicNotes, tagSlug } from '../../lib/content';
+// One page per tag, built from public notes only.
+export async function getStaticPaths() {
+  const groups = new Map();
+  for (const note of await publicNotes()) {
+    for (const tag of note.data.tags) {
+      const slug = tagSlug(tag);
+      if (!slug) continue;
+      if (!groups.has(slug)) groups.set(slug, { label: tag, notes: [] });
+      groups.get(slug).notes.push(note);
+    }
+  }
+  return [...groups].map(([tag, { label, notes }]) => ({ params: { tag }, props: { label, notes } }));
+}
+const { label, notes } = Astro.props;
+const total = `${notes.length} ${notes.length === 1 ? 'note' : 'notes'}`;
+---
+<Base title={`#${label}`} description={`Notes tagged ${label}.`}>
+  <main class="wrap">
+    <div class="page-head"><p class="mono kicker">Tag</p><h1><em>#{label}</em></h1><p class="lede">{total} tagged {label}. <a href="/archive/">See everything</a>.</p></div>
+    <EntryList notes={notes} />
+  </main>
+</Base>

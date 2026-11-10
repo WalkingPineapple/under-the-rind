@@ -9,7 +9,10 @@ tags: [agents]
 
 This is a sample note. An agent can look mysterious from the outside, but much of its behavior comes from a simple loop. I'm linking to [[Thinking in Systems]] and to [[a note that was never published]], which stays plain text.
 
+> [!pull]
 > The interesting decisions live in what the model gets to see.
+
+> An ordinary quotation stays quiet, so a whole paragraph copied from a book still reads comfortably.
 
 ## The smallest possible loop
 

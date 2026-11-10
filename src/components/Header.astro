@@ -1,12 +1,13 @@
 ---
 import Logo from './Logo.astro';
 import site from '../../site.config.mjs';
-const { dark = false } = Astro.props;
+const { dark = false, logoId = 'logo' } = Astro.props;
 const here = Astro.url.pathname;
-const items = [['Writing', '/writing/'], ['Reading', '/reading/'], ['Travel', '/travel/'], ['Weekly', '/weekly/'], ['About', '/about/']];
+// Weekly is private, so it lives in the footer rather than the main menu.
+const items = [['Writing', '/writing/'], ['Reading', '/reading/'], ['Travel', '/travel/'], ['About', '/about/']];
 ---
 <header class="site-head">
-  <a class="brand" href="/"><Logo dark={dark} />{site.title}</a>
+  <a class="brand" href="/"><Logo dark={dark} id={logoId} />{site.title}</a>
   <div class="head-right">
     <nav class="site-nav" aria-label="Main">
       {items.map(([label, href]) => <a href={href} aria-current={here.startsWith(href) ? 'page' : undefined}>{label}</a>)}

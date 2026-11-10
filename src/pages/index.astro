@@ -1,92 +1,148 @@
 ---
 import Base from '../layouts/Base.astro';
 import Header from '../components/Header.astro';
+import Logo from '../components/Logo.astro';
 import EntryList from '../components/EntryList.astro';
+import Shelf from '../components/Shelf.astro';
 import Spiral from '../components/Spiral.astro';
+import site from '../../site.config.mjs';
 import { noteUrl, ofType, publicNotes } from '../lib/content';
 const notes = await publicNotes();
 const books = (await ofType('reading')).slice(0, 7);
 const trip = (await ofType('travel'))[0];
+const tripDate = trip?.data.date.toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+const intro = "Hi, I'm Pineapple. I work in computer science, but mostly I'm just curious about how things work. This is my corner of the internet for notes, books, travel stories, and whatever has caught my attention this week.";
 ---
 <Base hideHeader={true}>
   <div class="hero" id="hero">
-    <div class="wrap">
+    <div class="wrap hero-front" id="hero-front">
       <Header dark={true} />
       <section class="hero-copy">
-        <h1>Under<br />the <em>Rind</em></h1>
-        <p>Hi, I'm Pineapple. I work in computer science, but mostly I'm just curious about how things work. This is my corner of the internet for notes, books, travel stories, and whatever has caught my attention this week.</p>
-        <button type="button" class="peel-btn" id="peel">Peel it open</button>
+        <h1 class="hero-title">Under<br />the <em>Rind</em></h1>
+        <p class="hero-lede">{intro}</p>
+        <button type="button" class="btn" id="peel" aria-expanded="false" aria-controls="flesh-inner">Peel it open</button>
       </section>
     </div>
-    <div class="flesh" id="flesh" aria-hidden="true">
-      <div class="wrap">
-        <div class="flesh-top"><span>what_is_actually_going_on.md</span><span>?!?!?!?</span></div>
+    <div class="flesh" id="flesh">
+      <!-- What the pointer's lens shows: the same hero, inverted. Decorative only. -->
+      <div class="wrap flesh-echo" aria-hidden="true" inert>
+        <Header logoId="logo-echo" />
+        <div class="hero-copy">
+          <div class="hero-title">Under<br />the <em>Rind</em></div>
+          <p class="hero-lede">{intro}</p>
+          <span class="btn">Peel it open</span>
+        </div>
+      </div>
+      <!-- What peeling reveals. -->
+      <div class="wrap flesh-inner" id="flesh-inner" inert>
+        <div class="flesh-top"><span>what_is_actually_going_on.md</span><button type="button" class="flesh-close" id="unpeel">Put the rind back</button></div>
         <div class="flesh-big">Wait,<br />how does <em>that</em> work?</div>
-        <div class="flesh-tags"><span>large language models</span><span>agents</span><span>quant trading</span><span>coffee</span><span>books</span><span>pineapple</span><span>whatever's next</span></div>
+        <div class="flesh-tags">{site.curious.map((topic) => <span>{topic}</span>)}</div>
       </div>
     </div>
   </div>
   <main class="wrap">
     <section class="home-section" aria-labelledby="fresh">
-      <div class="home-head"><h2 id="fresh">Freshly cut</h2><a href="/writing/">ls -lt /everything</a></div>
+      <div class="home-head"><h2 id="fresh">Freshly cut</h2><a href="/archive/">ls -lt /everything</a></div>
       <EntryList notes={notes.slice(0, 4)} />
     </section>
     <section class="home-section spiral-section" aria-labelledby="eyes">
       <div>
-        <div class="home-head" style="margin-bottom:0"><h2 id="eyes">Every eye is a note</h2></div>
+        <div class="home-head tight"><h2 id="eyes">Every eye is a note</h2></div>
         <p class="lede">A pineapple's eyes grow in spirals. Here, my notes do too.</p>
         <p id="spiral-read" class="mono spiral-read">Hover over an eye to look closer.</p>
         <div class="legend">
-          <a href="/writing/"><i style="background:var(--ink)"></i>Writing</a>
-          <a href="/reading/"><i style="background:var(--honey)"></i>Reading</a>
-          <a href="/travel/"><i style="background:#F3DFA2"></i>Travel</a>
+          <a href="/writing/"><i class="writing"></i>Writing</a>
+          <a href="/reading/"><i class="reading"></i>Reading</a>
+          <a href="/travel/"><i class="travel"></i>Travel</a>
         </div>
+        <a class="more" href="/graph/">open the full graph</a>
       </div>
       <div><Spiral notes={notes} /></div>
     </section>
     {books.length > 0 && (
       <section class="home-section" aria-labelledby="shelf">
         <div class="home-head"><h2 id="shelf">The shelf</h2><a href="/reading/">all books</a></div>
-        <div class="shelf">{books.map((b) => <a class="spine" href={noteUrl(b)}>{b.data.title}</a>)}</div>
+        <Shelf books={books} fill={7} />
       </section>
     )}
     <section class="home-section home-pair">
       {trip && (
         <a class="postcard" href={noteUrl(trip)}>
           <span><span class="mono">Postcard from</span><strong>{trip.data.place ?? trip.data.title}</strong>{trip.data.summary && <p>{trip.data.summary}</p>}</span>
-          <span class="stamp" aria-hidden="true">stamp</span>
+          <span class="stamp" aria-hidden="true"><Logo id="logo-stamp" /><span>{tripDate}</span></span>
         </a>
       )}
       <div class="gate">
-        <h2>Weekly <em>is still under the rind</em></h2>
-        <p style="margin:26px 0 18px;font-size:19px">My weekly notes are behind a password.</p>
-        <a class="peel-link" href="/weekly/">Go to Weekly</a>
+        <h2>Currently <em>curious about</em></h2>
+        <div class="pills">{site.curious.map((topic) => <span>{topic}</span>)}</div>
+        <a class="btn" href="/about/">More about me</a>
       </div>
     </section>
   </main>
   <script>
     const hero = document.getElementById('hero');
+    const front = document.getElementById('hero-front');
     const flesh = document.getElementById('flesh');
-    const button = document.getElementById('peel');
+    const inner = document.getElementById('flesh-inner');
+    const peel = document.getElementById('peel');
+    const unpeel = document.getElementById('unpeel');
+    // The lens only makes sense with a mouse. On touch screens the hero stays clean until you peel it.
+    const canHover = matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const LENS = '130px';
     let open = false;
-    const paint = (x = 72, y = 42) => {
-      flesh.style.clipPath = open ? 'circle(160% at 72% 42%)' : `circle(150px at ${x}% ${y}%)`;
+    let hovering = false;
+    let at = { x: 50, y: 50 };
+    let last = null;
+    let timer;
+
+    const clip = (radius) => { flesh.style.clipPath = `circle(${radius} at ${at.x}% ${at.y}%)`; };
+    const aim = (clientX, clientY) => {
+      const box = hero.getBoundingClientRect();
+      at = { x: ((clientX - box.left) / box.width) * 100, y: ((clientY - box.top) / box.height) * 100 };
     };
-    const move = (point) => {
-      if (open) return;
-      const r = hero.getBoundingClientRect();
-      paint(((point.clientX - r.left) / r.width) * 100, ((point.clientY - r.top) / r.height) * 100);
+    const aimAt = (el) => {
+      const box = el.getBoundingClientRect();
+      aim(box.left + box.width / 2, box.top + box.height / 2);
     };
-    paint();
-    hero.addEventListener('mousemove', move);
-    hero.addEventListener('touchmove', (e) => e.touches[0] && move(e.touches[0]), { passive: true });
-    button.addEventListener('click', () => {
-      open = !open;
-      button.textContent = open ? 'Put the rind back' : 'Peel it open';
-      // Keep the button reachable above the opened flesh.
-      button.style.position = 'relative';
-      button.style.zIndex = '5';
-      paint();
-    });
+
+    const setOpen = (next, event) => {
+      if (next === open) return;
+      const from = next ? peel : unpeel;
+      // Grow from, or shrink to, wherever the click happened. Keyboard presses have no position, so use the button.
+      if (event && event.clientX) aim(event.clientX, event.clientY);
+      else if (!next && hovering && last) aim(last.x, last.y);
+      else aimAt(from);
+      open = next;
+      hero.classList.add('is-peeling');
+      hero.classList.toggle('is-open', open);
+      clip(open ? '150%' : hovering ? LENS : '0px');
+      // Only the visible layer can be tabbed into or read out.
+      inner.inert = !open;
+      front.inert = open;
+      peel.setAttribute('aria-expanded', String(open));
+      (open ? unpeel : peel).focus({ preventScroll: true });
+      clearTimeout(timer);
+      timer = setTimeout(() => hero.classList.remove('is-peeling'), 700);
+    };
+
+    peel.addEventListener('click', (e) => setOpen(true, e));
+    unpeel.addEventListener('click', (e) => setOpen(false, e));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
+
+    if (canHover) {
+      hero.addEventListener('pointermove', (e) => {
+        if (e.pointerType !== 'mouse') return;
+        hovering = true;
+        last = { x: e.clientX, y: e.clientY };
+        if (open) return;
+        aim(e.clientX, e.clientY);
+        clip(LENS);
+      });
+      hero.addEventListener('pointerleave', () => {
+        hovering = false;
+        if (!open) clip('0px');
+      });
+    }
   </script>
 </Base>
