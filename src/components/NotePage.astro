@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { render } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import { backlinks, formatDate, noteUrl, ofType, readingTime, tagSlug, tagUrl } from '../lib/content';
+import { backlinks, formatDate, noteUrl, ofType, readingTime, stories, tagSlug, tagUrl } from '../lib/content';
 const { note } = Astro.props;
 const { Content, headings } = await render(note);
 const links = await backlinks(note);
@@ -15,24 +15,33 @@ const label = d.type[0].toUpperCase() + d.type.slice(1);
 // A contents list only earns its place on longer notes.
 const toc = headings.filter((h) => h.depth === 2);
 // The drop cap suits an essay, not a two-line thought.
-const dropcap = d.type === 'writing' && (note.body ?? '').length > 600;
+const dropcap = (d.type === 'writing' || d.type === 'story') && (note.body ?? '').length > 600;
 const tags = d.tags.filter((tag) => tagSlug(tag));
 
-// Older and newer notes in the same section. Lists are newest first.
+// A story is dated by when it happened; everything else by when it was written.
+const isStory = d.type === 'story';
+const stamp = isStory && d.when ? d.when : formatDate(d.date);
+
+// Neighbours in the same section. Stories run earliest to latest by when they happened;
+// other sections run newest first by when they were written.
 const section = d.type === 'writing' || d.type === 'reflection' ? ['writing', 'reflection'] : [d.type];
-const siblings = await ofType(...section);
+const siblings = isStory ? await stories() : await ofType(...section);
 const here = siblings.findIndex((n) => n.id === note.id);
-const newer = here > 0 ? siblings[here - 1] : undefined;
-const older = here >= 0 ? siblings[here + 1] : undefined;
+const up = here > 0 ? siblings[here - 1] : undefined;
+const down = here >= 0 ? siblings[here + 1] : undefined;
+const before = isStory ? up : down;
+const after = isStory ? down : up;
+const [beforeLabel, afterLabel] = isStory ? ['Earlier', 'Later'] : ['Older', 'Newer'];
 ---
 <Base title={d.title} description={d.summary} image={image} ogType="article">
   <main class="wrap">
     <div class="narrow">
       <div class="page-head">
-        <p class="mono kicker">{label} / {formatDate(d.date)} / {readingTime(note.body)} min</p>
+        <p class="mono kicker">{label} / {stamp} / {readingTime(note.body)} min</p>
         <h1>{d.title}</h1>
         {d.author && <p class="bookrow">{d.author}{d.rating != null && ` · ${d.rating} / 5`}</p>}
         {d.place && <p class="bookrow">{d.place}</p>}
+        {isStory && d.when && <p class="bookrow">Written {formatDate(d.date)}</p>}
       </div>
       {toc.length >= 3 && (
         <nav class="toc" aria-labelledby="toc-title">
@@ -44,10 +53,10 @@ const older = here >= 0 ? siblings[here + 1] : undefined;
       {tags.length > 0 && (
         <p class="tags">{tags.map((tag) => <a href={tagUrl(tag)}>#{tag}</a>)}</p>
       )}
-      {(older || newer) && (
+      {(before || after) && (
         <nav class="pager" aria-label="More notes">
-          {older ? <a href={noteUrl(older)} rel="prev"><span class="mono">Older</span><strong>{older.data.title}</strong></a> : <span></span>}
-          {newer ? <a class="next" href={noteUrl(newer)} rel="next"><span class="mono">Newer</span><strong>{newer.data.title}</strong></a> : <span></span>}
+          {before ? <a href={noteUrl(before)} rel="prev"><span class="mono">{beforeLabel}</span><strong>{before.data.title}</strong></a> : <span></span>}
+          {after ? <a class="next" href={noteUrl(after)} rel="next"><span class="mono">{afterLabel}</span><strong>{after.data.title}</strong></a> : <span></span>}
         </nav>
       )}
       {links.length > 0 && (

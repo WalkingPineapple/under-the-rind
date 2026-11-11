@@ -1,0 +1,27 @@
+---
+import Base from '../../layouts/Base.astro';
+import { noteUrl, stories } from '../../lib/content';
+// Earliest first: this page reads as one life in order, whenever each story was written.
+const items = await stories();
+---
+<Base title="Stories" description="Things that have happened to me, in the order they happened.">
+  <main class="wrap">
+    <div class="page-head"><h1>Stories</h1><p class="lede">Things that have happened to me, written down before I forget them.</p></div>
+    <p class="epigraph">I have stood at the summit and I have plunged into the depths; both have taught me a great deal.</p>
+    {items.length === 0
+      ? <p class="lede">Nothing written down yet. The first story is on its way.</p>
+      : (
+        <ol class="timeline">
+          {items.map((s) => (
+            <li>
+              <a class="moment" href={noteUrl(s)}>
+                <span class="mono when">{s.data.when ?? s.data.date.getUTCFullYear()}</span>
+                <strong>{s.data.title}</strong>
+                {s.data.summary && <p>{s.data.summary}</p>}
+              </a>
+            </li>
+          ))}
+        </ol>
+      )}
+  </main>
+</Base>

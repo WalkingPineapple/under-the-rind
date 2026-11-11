@@ -10,7 +10,7 @@ const total = `${notes.length} ${notes.length === 1 ? 'note' : 'notes'}`;
 ---
 <Base title="Archive" description="Every note on the site, newest first.">
   <main class="wrap">
-    <div class="page-head"><h1>Everything, <em>newest first</em></h1><p class="lede">{total} across writing, reading, and travel.</p></div>
+    <div class="page-head"><h1>Everything, <em>newest first</em></h1><p class="lede">{total} across writing, stories, reading, and travel.</p></div>
     {years.map((year) => (
       <section class="year" aria-labelledby={`year-${year}`}>
         <h2 id={`year-${year}`} class="section-title">{year}</h2>
